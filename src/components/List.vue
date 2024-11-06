@@ -18,6 +18,37 @@
       </div>
     </div>
 
+    <!-- sorting filters -->
+    <div class="my-4">
+      <a
+        href="#"
+        class="text-gray-900 my-2 rounded-md shadow-sm relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+        @click="sortBy('year')"
+        >Sort by year</a
+      >
+      |
+      <a
+        href="#"
+        class="text-gray-900 my-2 rounded-md shadow-sm relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+        @click="sortBy('name')"
+        >Sort by title</a
+      >
+      |
+      <a
+        href="#"
+        class="text-gray-900 my-2 rounded-md shadow-sm relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+        @click="sortBy('artist')"
+        >Sort by artist</a
+      >
+      |
+      <a
+        href="#"
+        class="text-gray-900 my-2 rounded-md shadow-sm relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+        @click="sortBy('genre')"
+        >Sort by genre</a
+      >
+    </div>
+
     <!-- albums list -->
     <ul role="list" class="divide-y divide-gray-100">
       <ListItem
@@ -45,21 +76,28 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import data from "../data/albums.json";
 import ListItem from "./ListItem.vue";
 
 const albums = data.albums;
-const searchFilter = ref("");
-const currentPage = ref(1);
-
 const albumsPerPage = 10;
-const sortedAlbums = albums.sort((a, b) => new Date(b.year) - new Date(a.year));
+
+const currentPage = ref(1);
+const searchFilter = ref("");
+const sortMethod = ref("year");
+
+const displayedAlbums = computed(() => {
+  const startIndex = (currentPage.value - 1) * albumsPerPage;
+  const endIndex = startIndex + albumsPerPage;
+
+  return filteredAlbums.value.slice(startIndex, endIndex);
+});
 
 const filteredAlbums = computed(() => {
   return searchFilter.value === ""
-    ? sortedAlbums
-    : sortedAlbums.filter((album) =>
+    ? sortedAlbums.value
+    : sortedAlbums.value.filter((album) =>
         album.name.toLowerCase().includes(searchFilter.value)
       );
 });
@@ -72,11 +110,22 @@ const pages = computed(() => {
   return Array.from({ length: pageCount.value }, (_, i) => i + 1);
 });
 
-const displayedAlbums = computed(() => {
-  const startIndex = (currentPage.value - 1) * albumsPerPage;
-  const endIndex = startIndex + albumsPerPage;
-
-  return filteredAlbums.value.slice(startIndex, endIndex);
+const sortedAlbums = computed(() => {
+  return [...albums].sort((a, b) => {
+    switch (sortMethod.value) {
+      case "artist":
+      case "genre":
+      case "name":
+        const nameA = a[sortMethod.value]?.toLowerCase();
+        const nameB = b[sortMethod.value]?.toLowerCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
+      case "year":
+      default:
+        return new Date(b.year) - new Date(a.year);
+    }
+  });
 });
 
 const changePage = (pageNumber) => {
@@ -87,6 +136,11 @@ const changePage = (pageNumber) => {
 
 const isActivePage = (page) => {
   return page === currentPage.value;
+};
+
+const sortBy = (method) => {
+  sortMethod.value = method;
+  currentPage.value = 1;
 };
 
 watch(currentPage, async () => {

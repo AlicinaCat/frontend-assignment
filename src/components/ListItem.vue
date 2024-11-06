@@ -6,15 +6,15 @@
           <p class="text-sm/6 font-semibold text-gray-900">{{ album.name }}</p>
           <p class="mt-1 truncate text-xs/5 text-gray-500">{{ album.year }}</p>
           <p class="mt-1 truncate text-xs/5 text-gray-500">{{ album.artist }}</p>
-          <p v-show="!showDetails" class="mt-1 truncate text-xs/5 text-gray-500">Click to see more...</p>
           <p v-show="showDetails" class="mt-1 truncate text-xs/5 text-gray-500">{{ album.genre }}</p>
+          <p class="mt-1 truncate text-xs/5 text-gray-500">Click to see {{ showDetailsText }}...</p>
         </div>
       </div>
     </li>
 </template>
 
 <script setup>
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
 
   defineProps({
     album: {
@@ -26,6 +26,11 @@
   });
 
   const showDetails = ref(false);
+ 
+  const showDetailsText = computed(() => {
+    return showDetails.value ? 'less' : 'more';
+  });
+
   const toggleVisibility = () => {
     showDetails.value = !showDetails.value;
   }

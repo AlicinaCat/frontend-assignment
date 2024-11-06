@@ -21,7 +21,7 @@
       name: String,
       year: Number,
       artist: String,
-      // imageUrl: String 
+      imageUrl: String
     }
   });
 

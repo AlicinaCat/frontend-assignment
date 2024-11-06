@@ -98,7 +98,10 @@ const filteredAlbums = computed(() => {
   return searchFilter.value === ""
     ? sortedAlbums.value
     : sortedAlbums.value.filter((album) =>
-        album.name.toLowerCase().includes(searchFilter.value)
+        album.name.toLowerCase().includes(searchFilter.value) ||
+        album.artist.toLowerCase().includes(searchFilter.value) ||
+        album.year.toString().includes(searchFilter.value) ||
+        album.genre.toLowerCase().includes(searchFilter.value)
       );
 });
 
